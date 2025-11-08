@@ -37,7 +37,7 @@ async def service_info(host, port, timeout=1.0):
 
         # Some ports require sending a request to send back data.
         # For HTTP/HTTPS, we can send a simple GET request.
-        request = f"HEAD / HTTP/1.0\r\nConnection: close\r\n\r\n"
+        request = f"GET / HTTP/1.0\r\nConnection: close\r\n\r\n"
         writer.write(request.encode('utf-8'))
         await writer.drain()
 
@@ -45,6 +45,9 @@ async def service_info(host, port, timeout=1.0):
             # For FTP, send a simple command to elicit a response
             writer.write(b"USER anonymous\r\n")
             await writer.drain()
+        elif port == 445 or port == 139:
+            # For SMB,  assume a banner
+            banner = "SMB2"
 
 
         data = await asyncio.wait_for(reader.read(1024), timeout)
